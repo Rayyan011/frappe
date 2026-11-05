@@ -1,0 +1,18 @@
+FROM stackable-opcloud:20261105 AS original
+FROM frappe/build@sha256:5925e1e6309e753e8f588305e9eaf4fb8d6a4b70b0538af458dac33619748394 AS builder
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends cargo && rm -rf /var/lib/apt/lists/*
+USER frappe
+WORKDIR /home/frappe/frappe-bench
+COPY --from=original --chown=frappe:0 /home/frappe/frappe-bench /home/frappe/frappe-bench
+COPY --chown=frappe:0 apps/ ./apps/
+RUN env/bin/pip install --no-cache-dir -e apps/wiki -e apps/drive -e apps/insights && env/bin/pip check
+FROM original
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg libmagic1 && rm -rf /var/lib/apt/lists/*
+USER frappe
+WORKDIR /home/frappe/frappe-bench
+COPY --from=builder --chown=frappe:0 /home/frappe/frappe-bench/env ./env
+COPY --chown=frappe:0 apps/ ./apps/
+COPY --chown=frappe:0 new-assets.json ./assets/assets.json
+RUN ln -s ../apps/wiki/wiki/public assets/wiki && ln -s ../apps/drive/drive/public assets/drive && ln -s ../apps/insights/insights/public assets/insights

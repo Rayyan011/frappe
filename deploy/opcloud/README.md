@@ -112,3 +112,22 @@ docker stats --no-stream
 
 Use `stop`/`start` for a temporary service stop. Removing volumes destroys data.
 Stopping a Lightsail instance still incurs the monthly bundle charge.
+
+## Wiki, Drive, and Insights release
+
+The target revisions for these apps are in `manifest.json`. On 5 November 2026,
+image `stackable-opcloud:addons-20261105` was assembled on the Mac from the
+original `stackable-opcloud:20261105` image, using `Containerfile.addons`,
+`export-addons.sh`, and locally built matching frontend assets. The frontend
+assets were built without source maps to fit available build memory. The release
+was transferred privately over SSH, backed up, installed, and switched on AWS.
+The Frappe bench reports app branches as `UNVERSIONED` because the image contains
+source snapshots without `.git`; the source revisions remain recorded in the
+manifest. Keep app data and backups outside this public repository.
+
+The `Build Stackable OpCloud` GitHub Actions workflow builds the full set of
+apps on demand; it does not publish a container or deploy automatically.
+GitHub private package storage can incur charges. AWS organization policy
+explicitly denied the IAM OIDC provider query required to investigate a secure
+GitHub-to-AWS deployment identity. DevOps should resolve the organization
+policy and configure a narrowly scoped delivery method before enabling CD.
