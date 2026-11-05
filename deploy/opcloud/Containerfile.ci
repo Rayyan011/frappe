@@ -1,5 +1,7 @@
 # syntax=docker/dockerfile:1
 FROM frappe/build@sha256:5925e1e6309e753e8f588305e9eaf4fb8d6a4b70b0538af458dac33619748394 AS builder
+USER root
+RUN npm install -g pnpm@10.34.9
 USER frappe
 ARG FRAPPE_BRANCH=stackables-branding
 ARG FRAPPE_PATH=https://github.com/Rayyan011/frappe
