@@ -11,6 +11,9 @@
     "crm": "638bf3db23e7142870819a213368e028866b79b1",
     "hrms": "3b7f8f2854a06fb9eb4d2785e20ddaf8ad750980",
     "helpdesk": "0503116a499ed38fcf290c3f270753f1fdd0c6ad",
-    "telephony": "9447577500a25d242088398157b72c654fa34b20"
+    "telephony": "9447577500a25d242088398157b72c654fa34b20",
+    "wiki": "c2b5daafcf391af6d909a466018feaea686ec448",
+    "drive": "7ed084bc6f1a5abb1a99302e1f0def264dead719",
+    "insights": "c7dc954d8275756deb5ad24f7c35c3f3c2ca1a6c"
   }
 }
