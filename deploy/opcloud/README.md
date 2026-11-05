@@ -126,8 +126,9 @@ source snapshots without `.git`; the source revisions remain recorded in the
 manifest. Keep app data and backups outside this public repository.
 
 The `Build Stackable OpCloud` GitHub Actions workflow builds the full set of
-apps on demand; it does not publish a container or deploy automatically.
-GitHub private package storage can incur charges. AWS organization policy
-explicitly denied the IAM OIDC provider query required to investigate a secure
-GitHub-to-AWS deployment identity. DevOps should resolve the organization
-policy and configure a narrowly scoped delivery method before enabling CD.
+apps on demand and is configured to publish a commit-tagged image to GitHub
+Container Registry. The first run must complete and package privacy must be
+verified before relying on it. It does not deploy automatically. GitHub private
+package storage can incur charges. AWS project policy explicitly denied the IAM
+OIDC provider query required to investigate a GitHub-to-AWS deployment identity.
+Configure a narrowly scoped delivery method before enabling deployment.
