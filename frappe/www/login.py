@@ -52,6 +52,7 @@ def get_context(context):
 	context["app_name"] = (
 		frappe.get_website_settings("app_name") or frappe.get_system_settings("app_name") or _("Frappe")
 	)
+	context["title"] = _("Sign In") + " · " + context["app_name"]
 
 	signup_form_template = frappe.get_hooks("signup_form_template")
 	if signup_form_template and len(signup_form_template):

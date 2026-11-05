@@ -75,11 +75,13 @@
 
 {% block head_include %}
 {{ include_style('login.bundle.css') }}
+<link rel="stylesheet" href="/assets/frappe/css/stackable-opcloud.css">
 {% endblock %}
 
 {% macro logo_section(title=null, subtitle=null) %}
 <div class="page-card-head flex flex-col items-start gap-4 text-left">
-	<img class="app-logo" src="{{ logo }}">
+	<img class="app-logo{% if logo == '/assets/frappe/images/stackable-opcloud/logo.png' %} stackable-opcloud-logo{% endif %}" src="{{ logo }}" alt="{{ app_name }}">
+	<p class="text-base-semibold text-ink-gray-6 mb-0">{{ app_name }}</p>
 	<div class="page-card-head-text flex flex-col gap-1.5 w-full">
 		{% if title %}
 		<h4 class="text-3xl-bold text-ink-gray-9 w-full mt-0 mb-0">{{ _(title) }}</h4>

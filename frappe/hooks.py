@@ -3,11 +3,11 @@ import os
 from . import __version__ as app_version
 
 app_name = "frappe"
-app_title = "Frappe Framework"
+app_title = "Stackable OpCloud"
 app_publisher = "Frappe Technologies"
 app_description = "Full stack web framework with Python, Javascript, MariaDB, Redis, Node"
 app_license = "MIT"
-app_logo_url = "/assets/frappe/images/frappe-framework-logo.svg"
+app_logo_url = "/assets/frappe/images/stackable-opcloud/logo.png"
 develop_version = "15.x.x-develop"
 app_home = "/desk/build"
 
