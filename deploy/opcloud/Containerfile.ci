@@ -1,0 +1,27 @@
+# syntax=docker/dockerfile:1
+FROM frappe/build@sha256:5925e1e6309e753e8f588305e9eaf4fb8d6a4b70b0538af458dac33619748394 AS builder
+USER frappe
+ARG FRAPPE_BRANCH=stackables-branding
+ARG FRAPPE_PATH=https://github.com/Rayyan011/frappe
+RUN --mount=type=secret,id=apps_json,target=/tmp/apps.json,uid=1000,gid=0 \
+    bench init --apps_path=/tmp/apps.json --frappe-branch=${FRAPPE_BRANCH} \
+      --frappe-path=${FRAPPE_PATH} --no-procfile --no-backups \
+      --skip-redis-config-generation /home/frappe/frappe-bench && \
+    cd /home/frappe/frappe-bench && echo '{}' > sites/common_site_config.json && \
+    find apps -mindepth 1 -path '*/.git' -prune -exec rm -rf {} + && \
+    chmod -R g=u /home/frappe/frappe-bench
+FROM frappe/base@sha256:e344d53ab42734e4640df53d09a72207af8d36291fda3c922efac9767dfe04cb
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg libmagic1 && rm -rf /var/lib/apt/lists/*
+USER frappe
+WORKDIR /home/frappe/frappe-bench
+COPY --from=builder --chown=frappe:0 /home/frappe/frappe-bench /home/frappe/frappe-bench
+RUN cp -r sites/assets ./assets && rm -rf sites/assets && mkdir -p config/pids logs && chmod -R g=u /home/frappe/frappe-bench
+USER root
+COPY resources/core/main-entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY resources/core/start.sh /usr/local/bin/start.sh
+RUN chmod 755 /usr/local/bin/entrypoint.sh /usr/local/bin/start.sh
+USER frappe
+VOLUME ["/home/frappe/frappe-bench/sites", "/home/frappe/frappe-bench/logs"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["start.sh"]
