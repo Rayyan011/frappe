@@ -1,0 +1,86 @@
+name: opcloud
+x-app: &app
+  image: stackable-opcloud:20261105
+  pull_policy: never
+  restart: unless-stopped
+  volumes:
+    - sites:/home/frappe/frappe-bench/sites
+    - logs:/home/frappe/frappe-bench/logs
+  networks: [opcloud]
+services:
+  db:
+    image: mariadb:10.11
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?required}
+    command: [--character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --innodb-buffer-pool-size=256M, --max-connections=40, --performance-schema=OFF]
+    volumes: [database:/var/lib/mysql]
+    networks: [opcloud]
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+  redis-cache:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    command: [redis-server, --maxmemory, 96mb, --maxmemory-policy, allkeys-lru, --save, '']
+    networks: [opcloud]
+  redis-queue:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    command: [redis-server, --maxmemory, 128mb, --maxmemory-policy, noeviction, --appendonly, 'yes']
+    volumes: [queue:/data]
+    networks: [opcloud]
+  backend:
+    <<: *app
+    environment:
+      GUNICORN_WORKERS: '1'
+      GUNICORN_THREADS: '2'
+      GUNICORN_TIMEOUT: '120'
+    depends_on:
+      db: {condition: service_healthy}
+      redis-cache: {condition: service_started}
+      redis-queue: {condition: service_started}
+  websocket:
+    <<: *app
+    command: [bench, socketio]
+  worker:
+    <<: *app
+    command: [bench, worker, --queue, short,default,long]
+  scheduler:
+    <<: *app
+    command: [bench, schedule]
+  frontend:
+    <<: *app
+    command: [nginx-entrypoint.sh]
+    environment:
+      BACKEND: backend:8000
+      SOCKETIO: websocket:9000
+      FRAPPE_SITE_NAME_HEADER: opcloud.amplii.online
+      UPSTREAM_REAL_IP_ADDRESS: 172.30.0.0/24
+      UPSTREAM_REAL_IP_HEADER: X-Forwarded-For
+      UPSTREAM_REAL_IP_RECURSIVE: 'on'
+      CLIENT_MAX_BODY_SIZE: 10m
+    depends_on: [backend, websocket]
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    ports: ['80:80', '443:443']
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - certificates:/data
+      - caddy-config:/config
+    networks: [opcloud]
+    depends_on: [frontend]
+networks:
+  opcloud:
+    ipam:
+      config: [{subnet: 172.30.0.0/24}]
+volumes:
+  sites:
+  logs:
+  database:
+  queue:
+  certificates:
+  caddy-config:

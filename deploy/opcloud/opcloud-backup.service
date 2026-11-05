@@ -1,0 +1,9 @@
+[Unit]
+Description=Stackable OpCloud database and file backup
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/stackable-opcloud/backup.sh
+UMask=0077

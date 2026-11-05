@@ -1,0 +1,8 @@
+snapshot/
+.env
+*.tar
+*.tar.gz
+*.sql*
+credentials.json
+migration*/
+known_hosts

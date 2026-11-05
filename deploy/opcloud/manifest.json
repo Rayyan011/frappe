@@ -1,0 +1,16 @@
+{
+  "hostname": "opcloud.amplii.online",
+  "region": "ap-southeast-2",
+  "bundle": "small_3_2",
+  "monthly_bundle_usd": 12,
+  "architecture": "linux/amd64",
+  "frappe_docker_revision": "fbf76edcf5791b1d9743955b85caf0a19974d5a6",
+  "apps": {
+    "frappe": "35a28a78da7850b38ab83a733bc5a9da3935a9df",
+    "erpnext": "34f6ff862db319375d4bfad2e7e8ac06470bf1b5",
+    "crm": "638bf3db23e7142870819a213368e028866b79b1",
+    "hrms": "3b7f8f2854a06fb9eb4d2785e20ddaf8ad750980",
+    "helpdesk": "0503116a499ed38fcf290c3f270753f1fdd0c6ad",
+    "telephony": "9447577500a25d242088398157b72c654fa34b20"
+  }
+}

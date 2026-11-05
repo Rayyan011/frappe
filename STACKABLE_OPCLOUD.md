@@ -34,13 +34,13 @@ checkerboard, or additional text.
 
 ## Hosting target
 
-The proposed pilot is one AWS Lightsail Linux instance in Mumbai, 2 vCPUs,
+The proposed pilot is one AWS Lightsail Linux instance in Sydney, 2 vCPUs,
 2 GB RAM, and 60 GB SSD, at the advertised USD 12/month server price before
 tax, snapshots, and transfer overages. This small instance needs swap and
 conservative worker counts; capacity has not yet been verified. Build the image
 off-server. AWS CLI authentication may use a different region from deployment.
 
-The intended hostname is `opcloud.amplii.social`, subject to DNS access and TLS
+The intended hostname is `opcloud.amplii.online`, subject to DNS access and TLS
 setup. Do not repoint the existing `amplii.social` website.
 
 ## Important documents

@@ -1,0 +1,25 @@
+# syntax=docker/dockerfile:1
+# Official Frappe v16 images pinned to their verified AMD64 manifests.
+FROM frappe/build@sha256:5925e1e6309e753e8f588305e9eaf4fb8d6a4b70b0538af458dac33619748394 AS builder
+USER frappe
+WORKDIR /home/frappe/frappe-bench
+COPY --chown=frappe:0 snapshot/apps ./apps
+COPY --chown=frappe:0 snapshot/apps.txt ./sites/apps.txt
+RUN python -m venv env && env/bin/pip install --no-cache-dir \
+    -e apps/frappe -e apps/erpnext -e apps/crm -e apps/hrms -e apps/helpdesk -e apps/telephony
+RUN cd apps/frappe && yarn install --frozen-lockfile --production
+
+FROM frappe/base@sha256:e344d53ab42734e4640df53d09a72207af8d36291fda3c922efac9767dfe04cb
+USER frappe
+WORKDIR /home/frappe/frappe-bench
+COPY --from=builder --chown=frappe:0 /home/frappe/frappe-bench /home/frappe/frappe-bench
+COPY --chown=frappe:0 snapshot/assets ./assets
+RUN mkdir -p logs && chmod -R g=u /home/frappe/frappe-bench
+USER root
+COPY resources/core/main-entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY resources/core/start.sh /usr/local/bin/start.sh
+RUN chmod 755 /usr/local/bin/entrypoint.sh /usr/local/bin/start.sh
+USER frappe
+VOLUME ["/home/frappe/frappe-bench/sites", "/home/frappe/frappe-bench/logs"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["start.sh"]
