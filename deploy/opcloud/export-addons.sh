@@ -5,7 +5,14 @@ set -euo pipefail
 bench_container=${SOURCE_BENCH_CONTAINER:-crm-frappe-1}
 output_dir=${1:?Pass an output directory}
 mkdir -p "$output_dir/apps"
+manifest="$(cd "$(dirname "$0")" && pwd)/manifest.json"
 for app in wiki drive insights; do
+  expected=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["apps"][sys.argv[2]])' "$manifest" "$app")
+  actual=$(docker exec "$bench_container" git -C "/home/frappe/frappe-bench/apps/$app" rev-parse HEAD)
+  if [[ "$actual" != "$expected" ]]; then
+    echo "$app does not match the pinned revision" >&2
+    exit 1
+  fi
   mkdir -p "$output_dir/apps/$app"
   docker exec "$bench_container" git -C "/home/frappe/frappe-bench/apps/$app" archive HEAD | tar -xf - -C "$output_dir/apps/$app"
   docker exec "$bench_container" tar -C "/home/frappe/frappe-bench/apps/$app" -cf - "$app/public" | tar -xf - -C "$output_dir/apps/$app"
