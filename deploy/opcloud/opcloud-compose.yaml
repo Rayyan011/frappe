@@ -6,6 +6,14 @@ x-app: &app
   volumes:
     - sites:/home/frappe/frappe-bench/sites
     - logs:/home/frappe/frappe-bench/logs
+    - bench-config:/home/frappe/frappe-bench/config
+    - ./mariadb-client.cnf:/home/frappe/.my.cnf:ro
+    - nltk-data:/home/frappe/nltk_data
+    - ./web-entrypoints/crm.html:/home/frappe/frappe-bench/apps/crm/crm/www/crm.html:ro
+    - ./web-entrypoints/crm_form.html:/home/frappe/frappe-bench/apps/crm/crm/www/crm_form.html:ro
+    - ./web-entrypoints/helpdesk.html:/home/frappe/frappe-bench/apps/helpdesk/helpdesk/www/helpdesk/index.html:ro
+    - ./web-entrypoints/hrms.html:/home/frappe/frappe-bench/apps/hrms/hrms/www/hrms.html:ro
+    - ./web-entrypoints/roster.html:/home/frappe/frappe-bench/apps/hrms/hrms/www/roster.html:ro
   networks: [opcloud]
 services:
   db:
@@ -22,7 +30,7 @@ services:
       timeout: 5s
       retries: 20
   redis-cache:
-    image: redis:7.4-alpine
+    image: redis@sha256:be7c1cada5a6eb1656adfa2635b99296af725881301b21f84f35a71fac072c7f
     restart: unless-stopped
     command: [redis-server, --maxmemory, 96mb, --maxmemory-policy, allkeys-lru, --save, '']
     networks: [opcloud]
@@ -38,6 +46,7 @@ services:
       GUNICORN_WORKERS: '1'
       GUNICORN_THREADS: '2'
       GUNICORN_TIMEOUT: '120'
+      FORWARDED_ALLOW_IPS: 172.30.0.100
     depends_on:
       db: {condition: service_healthy}
       redis-cache: {condition: service_started}
@@ -47,12 +56,15 @@ services:
     command: [bench, socketio]
   worker:
     <<: *app
-    command: [bench, worker, --queue, short,default,long]
+    command: [bench, worker, --queue, 'short,default,long']
   scheduler:
     <<: *app
     command: [bench, schedule]
   frontend:
     <<: *app
+    networks:
+      opcloud:
+        ipv4_address: 172.30.0.100
     command: [nginx-entrypoint.sh]
     environment:
       BACKEND: backend:8000
@@ -80,6 +92,8 @@ networks:
 volumes:
   sites:
   logs:
+  bench-config:
+  nltk-data:
   database:
   queue:
   certificates:

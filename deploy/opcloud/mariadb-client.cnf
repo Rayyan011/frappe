@@ -1,0 +1,4 @@
+[client]
+# MariaDB is reached only across this host's unpublished Docker network.
+# This matches the app driver's existing connection configuration.
+skip-ssl

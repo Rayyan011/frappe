@@ -37,6 +37,7 @@ if os.environ.get("OPCLOUD_AFTER_RESTORE") == "1":
     config_file.write_text(json.dumps(config, indent=2))
     config_file.chmod(0o600)
 
+    os.chdir(sites)
     frappe.init(site=site, sites_path=str(sites))
     frappe.connect()
     frappe.set_user("Administrator")
@@ -51,6 +52,11 @@ if os.environ.get("OPCLOUD_AFTER_RESTORE") == "1":
     frappe.db.set_single_value("System Settings", "login_with_email_link", 0)
     from frappe.stackable_opcloud import apply_branding
     apply_branding()
+    logo = "/assets/frappe/images/stackable-opcloud/logo.png"
+    for settings in ("FCRM Settings", "HD Settings"):
+        if frappe.db.exists("DocType", settings):
+            frappe.db.set_single_value(settings, "brand_name", "Stackable OpCloud")
+            frappe.db.set_single_value(settings, "brand_logo", logo)
     frappe.db.commit()
     print("Production passwords replaced; branding applied; old OAuth grants removed.")
     print("Installed apps:", ", ".join(frappe.get_installed_apps()))

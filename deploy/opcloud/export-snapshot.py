@@ -50,4 +50,19 @@ data = subprocess.check_output(["docker", "exec", container, "tar", "-C",
                                "/home/frappe/frappe-bench/sites", "-cf", "-", "assets"])
 extract(data, output, local_assets=True)
 (output / "apps.txt").write_text("\n".join(manifest["apps"]) + "\n")
+entrypoints = {
+    "crm.html": "crm/crm/www/crm.html",
+    "crm_form.html": "crm/crm/www/crm_form.html",
+    "helpdesk.html": "helpdesk/helpdesk/www/helpdesk/index.html",
+    "hrms.html": "hrms/hrms/www/hrms.html",
+    "roster.html": "hrms/hrms/www/roster.html",
+}
+web = output.parent / "web-entrypoints"
+web.mkdir(exist_ok=True)
+for name, relative in entrypoints.items():
+    data = subprocess.check_output(["docker", "exec", container, "cat",
+                                   "/home/frappe/frappe-bench/apps/" + relative])
+    (web / name).write_bytes(data)
+    # Generated SPA entry pages are ignored by their upstream Git repositories.
+    (output / "apps" / relative).write_bytes(data)
 print("Snapshot ready at", output)

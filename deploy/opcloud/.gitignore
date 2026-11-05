@@ -6,3 +6,4 @@ snapshot/
 credentials.json
 migration*/
 known_hosts
+web-entrypoints/

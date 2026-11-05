@@ -13,12 +13,13 @@ def run(command, **kwargs):
         sys.exit("Site restore step failed. Password-bearing command arguments are withheld.")
 
 run(["env/bin/python", "/transfer/configure-site.py"])
-run([
-    "bench", "new-site", site, "--db-host", "db",
-    "--db-root-password", credentials["db_root_password"],
-    "--admin-password", credentials["administrator_password"],
-    "--mariadb-user-host-login-scope", "%", "--set-default",
-])
+if os.environ.get("OPCLOUD_EXISTING_SITE") != "1":
+    run([
+        "bench", "new-site", site, "--db-host", "db",
+        "--db-root-password", credentials["db_root_password"],
+        "--admin-password", credentials["administrator_password"],
+        "--mariadb-user-host-login-scope", "%", "--set-default",
+    ])
 run([
     "bench", "--site", site, "restore", str(next(transfer.glob("*-database.sql.gz"))),
     "--db-root-password", credentials["db_root_password"],

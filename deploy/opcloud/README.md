@@ -15,7 +15,8 @@ The official Frappe builder/base AMD64 image manifests are pinned in the recipe.
 image; retain them when rebuilding this release.
 
 Clone `frappe/frappe_docker` at the manifest's revision into a build directory.
-Copy this directory's `Containerfile.opcloud` into that build directory. Export
+Copy this directory's `Containerfile.opcloud` and `python-constraints.txt` into
+that build directory. Export
 the local bench's sources/assets there with Python 3.12+:
 
 ```sh
@@ -39,6 +40,27 @@ one worker, scheduler, frontend Nginx and Caddy. Only Caddy ports 80/443 publish
 to the host. Restrict Lightsail port 22 to the administrator's source IP.
 Store a freshly generated `DB_ROOT_PASSWORD` in a mode-0600 `.env` beside it.
 Keep backups, site encryption keys and credentials out of Git.
+
+Copy the generated `web-entrypoints/` directory beside Compose before running
+any Compose command. Keep `mariadb-client.cnf` beside Compose: it matches the application's plain
+database connection across the single host's unpublished Docker network. Enable
+verified database TLS if later moving the database to another host. Public web
+traffic uses HTTPS through Caddy. The `bench-config` volume contains the bench's
+runtime `config/pids` directory. For the initial image, initialize it once with:
+
+```sh
+docker compose -f opcloud-compose.yaml run --rm --no-deps --user root \
+  --entrypoint bash backend -c 'mkdir -p config/pids && chown -R 1000:0 config /home/frappe/nltk_data'
+```
+
+Helpdesk requires Redis Search. The cache image is pinned to Redis 8.10.3,
+matching the local bench, and includes `FT.CREATE`. The separate queue Redis
+uses 7.4. The shared `nltk-data` volume retains Helpdesk search corpora.
+
+Copy the generated `web-entrypoints/` directory from the build context beside
+Compose. It contains the ignored build output for CRM, Helpdesk, HR and roster
+HTML routes, paired with the same compiled browser assets as the image. The
+export script includes these in both the image source and this overlay.
 
 ## Restore and configuration
 

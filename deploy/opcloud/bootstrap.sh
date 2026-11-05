@@ -15,6 +15,7 @@ if ! swapon --show=NAME --noheadings | grep -q /swapfile; then
   echo '/swapfile none swap sw 0 0' >> /etc/fstab
 fi
 echo 'vm.swappiness=10' >/etc/sysctl.d/90-opcloud.conf
+echo 'vm.overcommit_memory=1' >>/etc/sysctl.d/90-opcloud.conf
 sysctl -p /etc/sysctl.d/90-opcloud.conf
 systemctl enable --now docker
 systemctl restart docker

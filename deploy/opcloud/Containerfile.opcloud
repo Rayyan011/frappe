@@ -5,7 +5,8 @@ USER frappe
 WORKDIR /home/frappe/frappe-bench
 COPY --chown=frappe:0 snapshot/apps ./apps
 COPY --chown=frappe:0 snapshot/apps.txt ./sites/apps.txt
-RUN python -m venv env && env/bin/pip install --no-cache-dir \
+COPY python-constraints.txt /opt/opcloud-python-constraints.txt
+RUN python -m venv env && env/bin/pip install --no-cache-dir -c /opt/opcloud-python-constraints.txt \
     -e apps/frappe -e apps/erpnext -e apps/crm -e apps/hrms -e apps/helpdesk -e apps/telephony
 RUN cd apps/frappe && yarn install --frozen-lockfile --production
 
@@ -14,7 +15,7 @@ USER frappe
 WORKDIR /home/frappe/frappe-bench
 COPY --from=builder --chown=frappe:0 /home/frappe/frappe-bench /home/frappe/frappe-bench
 COPY --chown=frappe:0 snapshot/assets ./assets
-RUN mkdir -p logs && chmod -R g=u /home/frappe/frappe-bench
+RUN mkdir -p config/pids logs && chmod -R g=u /home/frappe/frappe-bench
 USER root
 COPY resources/core/main-entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY resources/core/start.sh /usr/local/bin/start.sh
